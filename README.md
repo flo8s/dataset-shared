@@ -16,6 +16,17 @@ git submodule add https://github.com/flo8s/dataset-shared.git shared
 scripts/build.sh local
 ```
 
+## 提供マクロ
+
+`macros/` に共通の dbt マクロを配置。各データセットの `dbt_project.yml` で参照する:
+
+```yaml
+macro-paths: ["macros", "shared/macros"]
+```
+
+- `macros/catalog.sql`: dbt-duckdb の `duckdb__get_catalog` オーバーライド。全アタッチ DB を対象にする修正
+- `macros/generate_schema_name.sql`: サブディレクトリ名をスキーマ名として使用
+
 ## 提供スクリプト
 
 - `scripts/build-dataset.sh`: データセットのビルド + artifacts push + catalog 自動リビルド
