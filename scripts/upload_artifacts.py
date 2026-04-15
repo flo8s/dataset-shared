@@ -17,7 +17,7 @@ from pathlib import Path
 TARGET_DIR = Path.cwd() / "target"
 FDL_TOML = Path.cwd() / "fdl.toml"
 
-ARTIFACTS = ["manifest.json", "catalog.json"]
+ARTIFACTS = ["manifest.json", "catalog.json", "semantic_manifest.json"]
 
 
 def upload_s3(datasource: str) -> None:
