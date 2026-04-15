@@ -26,7 +26,13 @@ jobs:
       - run: uv python install 3.13
       - run: uv lock --upgrade-package frozen-ducklake && uv sync
 
+      - name: Pull DuckLake catalog
+        run: uv run fdl pull default
+
       - name: Configure and run checkpoint
         run: |
           uv run fdl sql default "CALL ducklake.set_option('expire_older_than', '30 days')"
           uv run fdl sql default "CHECKPOINT"
+
+      - name: Push DuckLake catalog
+        run: uv run fdl push default
