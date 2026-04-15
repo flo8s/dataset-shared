@@ -31,7 +31,7 @@ jobs:
 
       - name: Configure and run checkpoint
         run: |
-          uv run fdl sql default "CALL ducklake.set_option('expire_older_than', '30 days')"
+          uv run fdl sql default "CALL ducklake_set_option(current_database(), 'expire_older_than', '30 days')"
           uv run fdl sql default "CHECKPOINT"
 
       - name: Push DuckLake catalog
