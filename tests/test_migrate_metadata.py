@@ -181,6 +181,18 @@ def test_column_text_moves_across_from_either_place(repo: Path):
     assert raw["published"] is False
 
 
+def test_dbt_quoting_comes_off_the_column_name(repo: Path):
+    """dbt writes '"総人口"' for names that need quoting; the column is 総人口."""
+    manifest = json.loads(json.dumps(MANIFEST))
+    manifest["nodes"]["model.calendar.mart_calendar"]["columns"] = {
+        '"総人口"': {"description": "人口"}
+    }
+    (repo / "target" / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+    migrate(repo)
+    data = yaml.safe_load((repo / "models/main/mart/mart_calendar.table.yml").read_text())
+    assert data["fields"] == [{"name": "総人口", "description": "人口"}]
+
+
 def test_columns_nobody_wrote_about_are_left_out(repo: Path):
     """compile enumerates the real columns, so an empty entry would only be noise."""
     manifest = json.loads(json.dumps(MANIFEST))

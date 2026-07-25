@@ -184,7 +184,7 @@ def table_declarations(manifest: dict[str, Any]) -> dict[str, dict[str, Any]]:
             column_meta = body.get("meta") or {}
             entry = _clean(
                 {
-                    "name": column,
+                    "name": _unquote(column),
                     "title": column_meta.get("title"),
                     "description": column_meta.get("description")
                     or body.get("description"),
@@ -200,6 +200,20 @@ def table_declarations(manifest: dict[str, Any]) -> dict[str, dict[str, Any]]:
         if _worth_writing(declaration):
             out[str(node.get("original_file_path") or "")] = declaration
     return out
+
+
+def _unquote(column: str) -> str:
+    """Drops dbt's quoting from a column name.
+
+    Columns whose names need quoting in SQL (Japanese headers, for one) are
+    written as '"総人口"' in dbt's YAML, quotes included. The declaration names
+    the column itself, so the quotes have to come off or the name will not match
+    anything in the data.
+    """
+    text = str(column).strip()
+    if len(text) > 1 and text.startswith('"') and text.endswith('"'):
+        return text[1:-1]
+    return text
 
 
 def _worth_writing(declaration: dict[str, Any]) -> bool:
