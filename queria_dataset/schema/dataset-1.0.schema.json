@@ -1,0 +1,175 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://queria.io/schema/dataset-1.0.schema.json",
+  "title": "Queria Dataset Declaration",
+  "description": "compile 済みの dataset.json。Publisher が書く YAML を正規化し、実データと dbt artifacts の情報を統合したもの。",
+  "type": "object",
+  "required": ["spec_version", "name", "title", "language", "licenses"],
+  "additionalProperties": false,
+  "properties": {
+    "spec_version": { "const": "1.0" },
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$",
+      "description": "URL 安全な識別子。将来 publisher/name への拡張余地を残すため consumer は / を含み得る前提で扱う"
+    },
+    "title": { "type": "string", "minLength": 1 },
+    "description": { "type": ["string", "null"] },
+    "keywords": { "type": "array", "items": { "type": "string" } },
+    "homepage": { "type": ["string", "null"], "format": "uri" },
+    "language": {
+      "type": "string",
+      "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]+)*$",
+      "description": "BCP 47。このデータセットの記述が書かれている言語。Queria は翻訳しない"
+    },
+    "licenses": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/license" }
+    },
+    "sources": { "type": "array", "items": { "$ref": "#/$defs/source" } },
+    "contributors": { "type": "array", "items": { "$ref": "#/$defs/contributor" } },
+    "temporal_coverage": { "$ref": "#/$defs/temporalCoverage" },
+    "spatial_coverage": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[A-Z]{2}$" },
+      "description": "ISO 3166-1 alpha-2"
+    },
+    "update_frequency": {
+      "type": ["string", "null"],
+      "enum": ["continuous", "daily", "weekly", "monthly", "quarterly", "yearly", "irregular", null]
+    },
+    "cover": { "type": ["string", "null"] },
+    "ai_context": { "$ref": "#/$defs/aiContext" },
+    "schemas": { "type": "array", "items": { "$ref": "#/$defs/schema" } },
+    "tables": { "type": "array", "items": { "$ref": "#/$defs/table" } },
+    "platform": { "$ref": "#/$defs/platform" }
+  },
+  "$defs": {
+    "license": {
+      "type": "object",
+      "required": ["id", "commercial_use"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "spdx": { "type": ["string", "null"] },
+        "url": { "type": ["string", "null"] },
+        "title": { "type": ["string", "null"] },
+        "commercial_use": { "type": "boolean" },
+        "share_alike": { "type": "boolean" },
+        "attribution_required": { "type": "boolean" }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "title": { "type": ["string", "null"] },
+        "path": { "type": ["string", "null"] }
+      }
+    },
+    "contributor": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "title": { "type": ["string", "null"] },
+        "path": { "type": ["string", "null"] },
+        "roles": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "temporalCoverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "start": { "type": ["string", "null"] },
+        "end": { "type": ["string", "null"] }
+      }
+    },
+    "aiContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "キー名は Apache Ossie の推奨 ai_context フィールドに揃えている",
+      "properties": {
+        "instructions": { "type": ["string", "null"] },
+        "synonyms": { "type": "array", "items": { "type": "string" } },
+        "examples": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "schema": {
+      "type": "object",
+      "required": ["name"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "title": { "type": ["string", "null"] },
+        "description": { "type": ["string", "null"] }
+      }
+    },
+    "table": {
+      "type": "object",
+      "required": ["schema", "name", "published", "fields"],
+      "additionalProperties": false,
+      "properties": {
+        "schema": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "title": { "type": ["string", "null"] },
+        "description": { "type": ["string", "null"] },
+        "keywords": { "type": "array", "items": { "type": "string" } },
+        "published": { "type": "boolean" },
+        "materialized": { "type": ["string", "null"] },
+        "sql": { "type": ["string", "null"] },
+        "source_path": {
+          "type": ["string", "null"],
+          "description": "リポジトリ相対パス。homepage と組み合わせてソースコードリンクを作る"
+        },
+        "licenses": { "type": "array", "items": { "$ref": "#/$defs/license" } },
+        "sources": { "type": "array", "items": { "$ref": "#/$defs/source" } },
+        "depends_on": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[^.]+\\.[^.]+$" },
+          "description": "同一データセット内の schema.name。v1 ではクロスデータセット参照を許さない"
+        },
+        "ai_context": { "$ref": "#/$defs/aiContext" },
+        "fields": { "type": "array", "items": { "$ref": "#/$defs/field" } }
+      }
+    },
+    "field": {
+      "type": "object",
+      "required": ["name", "index"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "title": { "type": ["string", "null"] },
+        "description": { "type": ["string", "null"] },
+        "type": { "type": ["string", "null"], "description": "実データから解決した物理型" },
+        "index": { "type": "integer", "minimum": 0 },
+        "nullable": { "type": ["boolean", "null"] },
+        "semantic": { "$ref": "#/$defs/semantic" }
+      }
+    },
+    "semantic": {
+      "type": "object",
+      "required": ["role"],
+      "additionalProperties": false,
+      "properties": {
+        "role": { "enum": ["entity", "dimension", "measure"] },
+        "name": { "type": ["string", "null"], "description": "entity 名。データセットを跨いで同名なら関連付けられる" },
+        "agg": { "type": ["string", "null"], "description": "measure の集約方法" }
+      }
+    },
+    "platform": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Platform が付与する。Publisher が書いたら error",
+      "properties": {
+        "ducklake_url": { "type": ["string", "null"] },
+        "canonical_url": { "type": ["string", "null"] },
+        "modified": { "type": ["string", "null"] },
+        "validation_status": { "enum": ["pending", "validated", "active"] },
+        "license_verified": { "type": "boolean" }
+      }
+    }
+  }
+}

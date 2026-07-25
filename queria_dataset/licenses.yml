@@ -1,0 +1,128 @@
+# Queria が受け入れるライセンスのレジストリ。
+#
+# ここに記録されているのは Queria としての判定であり、法的助言ではない。
+# フラグの意味:
+#   commercial_use        商用利用・商用再配布が可能か。false のデータセットは受け入れない
+#   share_alike           同一条件での継承が要求されるか
+#   attribution_required  出典・帰属の表示が要求されるか。true なら記述側に帰属文が要る
+#
+# 新しいライセンスを追加するときは、必ず一次情報（提供元の利用規約ページ）を確認し、
+# url にその URL を書くこと。判断できない場合は追加せず、dataset.yml 側で
+# commercial_use を明示させて検証ゲートの人手レビューに回す。
+
+# ---- 国際的な標準ライセンス（SPDX ID を持つ） ----
+
+CC0-1.0:
+  spdx: CC0-1.0
+  url: https://creativecommons.org/publicdomain/zero/1.0/
+  title: CC0 1.0 Universal
+  commercial_use: true
+  share_alike: false
+  attribution_required: false
+
+CC-BY-4.0:
+  spdx: CC-BY-4.0
+  url: https://creativecommons.org/licenses/by/4.0/
+  title: Creative Commons Attribution 4.0 International
+  commercial_use: true
+  share_alike: false
+  attribution_required: true
+
+CC-BY-SA-4.0:
+  spdx: CC-BY-SA-4.0
+  url: https://creativecommons.org/licenses/by-sa/4.0/
+  title: Creative Commons Attribution-ShareAlike 4.0 International
+  commercial_use: true
+  share_alike: true
+  attribution_required: true
+
+CC-BY-3.0-IGO:
+  spdx: CC-BY-3.0-IGO
+  url: https://creativecommons.org/licenses/by/3.0/igo/
+  title: Creative Commons Attribution 3.0 IGO
+  commercial_use: true
+  share_alike: false
+  attribution_required: true
+
+Unicode-3.0:
+  spdx: Unicode-3.0
+  url: https://spdx.org/licenses/Unicode-3.0.html
+  title: Unicode License v3
+  commercial_use: true
+  share_alike: false
+  attribution_required: true
+
+ODbL-1.0:
+  spdx: ODbL-1.0
+  url: https://opendatacommons.org/licenses/odbl/1-0/
+  title: Open Data Commons Open Database License v1.0
+  commercial_use: true
+  share_alike: true
+  attribution_required: true
+
+# 米国連邦政府の著作物など、権利が主張されていないもの
+public-domain:
+  spdx: null
+  url: https://en.wikipedia.org/wiki/Public_domain
+  title: Public Domain
+  commercial_use: true
+  share_alike: false
+  attribution_required: false
+
+# ---- 日本の公的データの利用規約（SPDX ID なし） ----
+
+JP-GOV-STD-2.0:
+  spdx: null
+  url: https://www.digital.go.jp/resources/open_data/government_standard_terms_of_use_ver2.0
+  title: 政府標準利用規約（第2.0版）
+  commercial_use: true
+  share_alike: false
+  attribution_required: true
+
+JP-DIGITAL-ADDRESS-BR:
+  spdx: null
+  url: https://www.digital.go.jp/policies/base_registry_address_tos
+  title: アドレス・ベース・レジストリ利用規約（デジタル庁）
+  commercial_use: true
+  share_alike: false
+  attribution_required: true
+
+JP-MLIT-NLFTP:
+  spdx: null
+  url: https://nlftp.mlit.go.jp/ksj/other/agreement.html
+  title: 国土数値情報 利用約款
+  commercial_use: true
+  share_alike: false
+  attribution_required: true
+
+JP-GSI-PDL-1.0:
+  spdx: null
+  url: https://www.gsi.go.jp/kikakuchousei/kikakuchousei40182.html
+  title: 国土地理院コンテンツ利用規約（公共データ利用規約 PDL 1.0 準拠）
+  commercial_use: true
+  share_alike: false
+  attribution_required: true
+
+JP-FSA-EDINET:
+  spdx: null
+  url: https://disclosure2.edinet-fsa.go.jp/
+  title: 金融庁 EDINET 利用規約
+  commercial_use: true
+  share_alike: false
+  attribution_required: true
+
+JP-JAPANPOST-ZIPCODE:
+  spdx: null
+  url: https://www.post.japanpost.jp/zipcode/dl/utf-readme.html
+  title: 郵便番号データ 利用条件（日本郵便）
+  commercial_use: true
+  share_alike: false
+  attribution_required: false
+
+JP-MEDIAARTS-DB:
+  spdx: null
+  url: https://github.com/mediaarts-db/dataset
+  title: メディア芸術データベース データセット利用条件
+  commercial_use: true
+  share_alike: false
+  attribution_required: true
