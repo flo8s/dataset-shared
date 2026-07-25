@@ -27,13 +27,24 @@ SPEC_VERSION = "0.1"
 #: Anything absent stops the migration so a person decides.
 LICENSE_IDS = {
     "政府標準利用規約 第2.0版": "JP-GOV-STD-2.0",
+    "政府標準利用規約（第2.0版）": "JP-GOV-STD-2.0",
     "CC BY 4.0": "CC-BY-4.0",
+    "クリエイティブ・コモンズ 表示 4.0 国際 (CC BY 4.0)": "CC-BY-4.0",
     "デジタル庁利用規約": "JP-DIGITAL-ADDRESS-BR",
     "国土数値情報利用規約": "JP-MLIT-NLFTP",
     "国土地理院コンテンツ利用規約（公共データ利用規約 PDL 1.0）": "JP-GSI-PDL-1.0",
     "金融庁 EDINET 利用規約": "JP-FSA-EDINET",
     "自由利用（日本郵便）": "JP-JAPANPOST-ZIPCODE",
     "メディア芸術データベースデータセット利用条件（自由な二次利用可）": "JP-MEDIAARTS-DB",
+    # The ministries below all publish under PDL 1.0, worded differently in each
+    # fdl.toml. Two of these free texts had gone stale: the gBizINFO terms page
+    # they name is gone, and the JMA now follows PDL 1.0 rather than the
+    # government standard terms. The ids are what their own pages say today.
+    "公共データ利用規約（第1.0版）": "JP-PDL-1.0",
+    "公共データ利用規約（第1.0版）準拠（CC BY 4.0 互換、出典明記が必要）": "JP-PDL-1.0",
+    "公共データ利用規約（第1.0版）(PDL1.0) / CC BY 4.0": "JP-PDL-1.0",
+    "気象庁ホームページ利用規約（政府標準利用規約 第2.0版 準拠）": "JP-PDL-1.0",
+    "gBizINFO 利用規約準拠（出典明記のうえ商用利用可）": "JP-GOV-STD-2.0",
 }
 
 #: fdl.toml [meta].schedule values that the declaration accepts as-is.
@@ -86,10 +97,24 @@ def license_id(free_text: str) -> str:
     return resolved
 
 
-def dataset_declaration(meta: dict[str, Any], name: str) -> dict[str, Any]:
-    """Turns fdl.toml's [meta] into the dataset-level declaration."""
-    if not meta.get("license"):
-        raise MigrationError("fdl.toml [meta] has no license")
+def dataset_declaration(
+    meta: dict[str, Any], name: str, licenses: list[str] | None = None
+) -> dict[str, Any]:
+    """Turns fdl.toml's [meta] into the dataset-level declaration.
+
+    ``licenses`` names the ids to use instead of reading [meta].license. Queria's
+    own datasets need it: their content is nobody else's, so they never had a
+    license to carry over, and the declaration requires one.
+    """
+    if licenses:
+        ids = list(licenses)
+    elif meta.get("license"):
+        ids = [license_id(meta["license"])]
+    else:
+        raise MigrationError(
+            "fdl.toml [meta] has no license. Pass --license <id> to say what this "
+            "dataset is published under"
+        )
 
     out: dict[str, Any] = {
         "spec_version": SPEC_VERSION,
@@ -101,7 +126,7 @@ def dataset_declaration(meta: dict[str, Any], name: str) -> dict[str, Any]:
         # Every dataset moved here today is described in Japanese. A dataset in
         # another language sets this itself.
         "language": "ja",
-        "licenses": [license_id(meta["license"])],
+        "licenses": ids,
     }
 
     if meta.get("source_url"):
@@ -204,7 +229,9 @@ def ensure_dbtignore(root: Path) -> bool:
     return True
 
 
-def migrate(root: Path, *, force: bool = False) -> list[Path]:
+def migrate(
+    root: Path, *, force: bool = False, licenses: list[str] | None = None
+) -> list[Path]:
     fdl_toml = root / "fdl.toml"
     if not fdl_toml.is_file():
         raise MigrationError(f"{fdl_toml} not found")
@@ -228,7 +255,7 @@ def migrate(root: Path, *, force: bool = False) -> list[Path]:
     if dataset_file.exists() and not force:
         raise MigrationError(f"{dataset_file} already exists (pass --force to replace)")
     dataset_file.write_text(
-        _dump(dataset_declaration(meta, str(config["name"]))), encoding="utf-8"
+        _dump(dataset_declaration(meta, str(config["name"]), licenses)), encoding="utf-8"
     )
     written.append(dataset_file)
 
@@ -252,10 +279,17 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--force", action="store_true", help="replace declarations that already exist"
     )
+    parser.add_argument(
+        "--license",
+        action="append",
+        dest="licenses",
+        metavar="ID",
+        help="license id to use instead of the one in fdl.toml (repeatable)",
+    )
     args = parser.parse_args(argv)
 
     try:
-        written = migrate(args.root, force=args.force)
+        written = migrate(args.root, force=args.force, licenses=args.licenses)
     except MigrationError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1

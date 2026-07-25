@@ -18,6 +18,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from migrate_metadata import (  # noqa: E402
     MigrationError,
     dataset_declaration,
+    license_id,
     migrate,
     table_declarations,
 )
@@ -102,6 +103,33 @@ def test_the_free_text_license_becomes_an_id(repo: Path):
     migrate(repo)
     data = yaml.safe_load((repo / "dataset.yml").read_text())
     assert data["licenses"] == ["JP-GOV-STD-2.0"]
+
+
+def test_the_same_terms_worded_differently_reach_the_same_id(repo: Path):
+    """Each fdl.toml spelled its license by hand, so the wording varies."""
+    for free_text in (
+        "公共データ利用規約（第1.0版）",
+        "公共データ利用規約（第1.0版）(PDL1.0) / CC BY 4.0",
+        "気象庁ホームページ利用規約（政府標準利用規約 第2.0版 準拠）",
+    ):
+        assert license_id(free_text) == "JP-PDL-1.0"
+    assert license_id("政府標準利用規約（第2.0版）") == "JP-GOV-STD-2.0"
+    assert license_id("クリエイティブ・コモンズ 表示 4.0 国際 (CC BY 4.0)") == "CC-BY-4.0"
+
+
+def test_a_license_can_be_given_on_the_command_line(repo: Path):
+    """Queria's own datasets have no [meta].license to carry over."""
+    text = (repo / "fdl.toml").read_text().replace(
+        'license = "政府標準利用規約 第2.0版"\n', ""
+    )
+    (repo / "fdl.toml").write_text(text, encoding="utf-8")
+
+    with pytest.raises(MigrationError, match="--license"):
+        migrate(repo)
+
+    migrate(repo, licenses=["CC-BY-4.0"])
+    data = yaml.safe_load((repo / "dataset.yml").read_text())
+    assert data["licenses"] == ["CC-BY-4.0"]
 
 
 def test_an_unmapped_license_stops_the_migration(repo: Path):
