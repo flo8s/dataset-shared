@@ -168,7 +168,10 @@ def table_declarations(manifest: dict[str, Any]) -> dict[str, dict[str, Any]]:
 
         declaration: dict[str, Any] = {
             "schema": node.get("schema"),
-            "name": node.get("name"),
+            # The alias, not the model name: a model configured with
+            # alias='establishment' builds a table by that name, and the
+            # declaration names the table.
+            "name": node.get("alias") or node.get("name"),
             "title": meta.get("title"),
             "description": node.get("description"),
             "keywords": meta.get("tags") or [],

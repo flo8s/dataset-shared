@@ -203,6 +203,18 @@ def test_columns_nobody_wrote_about_are_left_out(repo: Path):
     assert [f["name"] for f in data["fields"]] == ["date", "year"]
 
 
+def test_an_aliased_model_is_declared_under_its_table_name(repo: Path):
+    """A model with alias='establishment' builds a table by that name."""
+    manifest = json.loads(json.dumps(MANIFEST))
+    node = manifest["nodes"]["model.calendar.mart_calendar"]
+    node["alias"] = "calendar"
+    (repo / "target" / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+    migrate(repo)
+    # The file still sits next to the model, but names the table it builds.
+    data = yaml.safe_load((repo / "models/main/mart/mart_calendar.table.yml").read_text())
+    assert data["name"] == "calendar"
+
+
 def test_models_nobody_wrote_about_get_no_file(repo: Path):
     manifest = {
         "nodes": {
