@@ -1,0 +1,15 @@
+[project]
+name = "dataset-shared"
+version = "0.1.0"
+description = "Queria データセットリポジトリの共通スクリプト"
+requires-python = ">=3.11"
+dependencies = ["pyyaml>=6"]
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.uv]
+package = false
