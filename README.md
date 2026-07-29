@@ -12,9 +12,14 @@ Queria データセットリポジトリの共通スクリプト。
 # submodule 追加（初回のみ）
 git submodule add https://github.com/queria-io/dataset-shared.git shared
 
-# ビルド
-scripts/build.sh local
+# ビルドして Queria に公開する
+scripts/build.sh
 ```
+
+公開先は選ばない。データセットは `dataset.yml`、アカウントは `QUERIA_TOKEN` が決める。
+公開せずに 1 回転させたいときは queria-cli の `tools/rotate.py` をスタンドインに向けて回す
+（fdl の `local` ターゲットに相当するものは無い。書き込みは Queria が発行する
+一時認証情報を必ず経由する）。
 
 ## 提供マクロ
 
@@ -29,8 +34,7 @@ macro-paths: ["macros", "shared/macros"]
 
 ## 提供スクリプト
 
-- `scripts/build-dataset.sh`: データセットのビルド + artifacts push + catalog 自動リビルド
-- `scripts/upload_artifacts.py`: dbt artifacts の S3/ローカル push
+- `scripts/build-dataset.sh`: `queria sync`（pull → ビルド → push）を回す
 - `scripts/migrate_metadata.py`: メタデータを `dataset.yml` へ移す（リポジトリごとに 1 回）
 
 ## メタデータの移行
@@ -40,7 +44,7 @@ macro-paths: ["macros", "shared/macros"]
 `queria compile` の出力する `dataset.json` を読む。
 
 ```bash
-bash scripts/build.sh local     # dbt が manifest.json を書く
+bash scripts/build.sh           # dbt が manifest.json を書く
 python shared/scripts/migrate_metadata.py
 ```
 

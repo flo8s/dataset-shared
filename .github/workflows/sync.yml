@@ -7,7 +7,9 @@ on:
         required: true
         type: string
       s3_bucket:
-        required: true
+        # fdl のリポだけが使う。queria に移ったリポでは何も指さないので、
+        # 最後のリポが移り終わったら入力ごと外す
+        required: false
         type: string
 
 jobs:
@@ -15,6 +17,10 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PYTHONUNBUFFERED: "1"
+      # queria は誰のデータセットに書くのかをトークンから決める。R2 の鍵は渡さない
+      # (一時認証情報を queria が取り、それも値ではなく取り方だけがビルドに渡る)
+      QUERIA_TOKEN: ${{ secrets.QUERIA_TOKEN }}
+      # 以下 3 つは移行前のリポのみ。最後のリポが移り終わったら外す
       FDL_S3_ENDPOINT: https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com
       FDL_S3_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY_ID }}
       FDL_S3_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_ACCESS_KEY }}
@@ -35,11 +41,24 @@ jobs:
           enable-cache: true
       - run: uv python install 3.13
 
-      # fdl (frozen-ducklake) はベータ開発中のため、常に最新版を使用する
-      - run: uv lock --upgrade-package frozen-ducklake && uv sync
+      # どちらもベータ開発中なので、常に最新版を使用する。
+      # fdl.toml の有無が「このリポはまだ fdl か」の判定。移行済みのリポには無い
+      - name: Install dependencies
+        run: |
+          if [ -f fdl.toml ]; then
+            uv lock --upgrade-package frozen-ducklake
+          else
+            uv lock --upgrade-package queria
+          fi
+          uv sync
 
       - name: Build and push
-        run: scripts/build.sh default
+        run: |
+          if [ -f fdl.toml ]; then
+            scripts/build.sh default
+          else
+            scripts/build.sh
+          fi
 
       - name: Generate app token
         id: app-token
