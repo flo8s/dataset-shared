@@ -37,6 +37,10 @@ macro-paths: ["macros", "shared/macros"]
 - `scripts/build-dataset.sh`: `queria sync`（pull → ビルド → push）を回す
 - `scripts/migrate_metadata.py`: メタデータを `dataset.yml` へ移す（リポジトリごとに 1 回）
 
+## 規約
+
+- [CONVENTIONS.md](CONVENTIONS.md): データセットについて分かったことを、カラム説明・テーブル説明・`ai_context`・クックブックのどこに書くか
+
 ## メタデータの移行
 
 データセットのメタデータは `fdl.toml` の `[meta]` と dbt の `meta:` に分かれているが、
@@ -60,7 +64,7 @@ python shared/scripts/migrate_metadata.py
 |---|---|
 | `contributors` | 誰を帰属先にするかは既存メタデータに無い。多くのライセンスが必須なので `queria validate` が止まる |
 | `temporal_coverage` / `spatial_coverage` | 収録範囲は人が知っている |
-| `ai_context` | エージェント向けの注意点 |
+| `ai_context` | エージェント向けの注意点。何をどこに書くかは [CONVENTIONS.md](CONVENTIONS.md) |
 
 **`[meta]` と `meta.*` はすぐには消さない。** カタログが `dataset.json` を読むように
 なる前に消すと、本番でそのデータセットのメタデータが空になる。
