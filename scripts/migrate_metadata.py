@@ -308,8 +308,6 @@ nothing in fdl.toml or dbt knows them:
                       `queria validate` will stop until it is filled in
   temporal_coverage   the period the data covers
   spatial_coverage    the countries it covers
-  ai_context          what agents should know: what the data is for, and what
-                      is easy to get wrong about it
 
 Run `queria validate` next; it lists what is still missing.
 
