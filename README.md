@@ -31,6 +31,7 @@ macro-paths: ["macros", "shared/macros"]
 
 - `macros/catalog.sql`: dbt-duckdb の `duckdb__get_catalog` オーバーライド。全アタッチ DB を対象にする修正
 - `macros/generate_schema_name.sql`: サブディレクトリ名をスキーマ名として使用
+- `macros/drop_build_leftovers.sql`: dbt が run の終わりに残す `__dbt_backup` / `__dbt_tmp` を落とす。incremental モデルを `--full-refresh` で作り直すと、置き換え前のテーブルがコピーとして残ったまま run が終わり、そのまま公開されてしまう。該当するデータセットの `dbt_project.yml` で `on-run-end: "{{ drop_build_leftovers() }}"` を設定する
 
 ## 提供スクリプト
 
