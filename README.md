@@ -37,9 +37,17 @@ macro-paths: ["macros", "shared/macros"]
 - `scripts/build-dataset.sh`: `queria sync`（pull → ビルド → push）を回す
 - `scripts/migrate_metadata.py`: メタデータを `dataset.yml` へ移す（リポジトリごとに 1 回）
 
-## 規約
+## 記述の規約
 
-- [CONVENTIONS.md](CONVENTIONS.md): データセットについて分かったことを、カラム説明・テーブル説明・`ai_context`・クックブックのどこに書くか
+データセットについて分かったことを、カラム説明・テーブル説明・`ai_context`・
+クックブックのどこに書くかは
+[docs.queria.io/publish/writing-descriptions](https://docs.queria.io/publish/writing-descriptions)
+にある。ここには置かない。このリポジトリを submodule で参照するのは queria 自身の
+データセットだけだが、規約はすべての発行者に等しく効くため。
+
+クックブックの原稿だけは事情が違う。各リポジトリの `docs/*.md` に置いたものが
+docs.queria.io のクックブックに取り込まれる。取り込みはカタログに登録済みの
+リポジトリからしか行われないので、これは first-party 固有の話になる。
 
 ## メタデータの移行
 
@@ -64,7 +72,7 @@ python shared/scripts/migrate_metadata.py
 |---|---|
 | `contributors` | 誰を帰属先にするかは既存メタデータに無い。多くのライセンスが必須なので `queria validate` が止まる |
 | `temporal_coverage` / `spatial_coverage` | 収録範囲は人が知っている |
-| `ai_context` | エージェント向けの注意点。何をどこに書くかは [CONVENTIONS.md](CONVENTIONS.md) |
+| `ai_context` | エージェント向けの注意点。何をどこに書くかは [記述の規約](#記述の規約) |
 
 **`[meta]` と `meta.*` はすぐには消さない。** カタログが `dataset.json` を読むように
 なる前に消すと、本番でそのデータセットのメタデータが空になる。
