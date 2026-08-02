@@ -37,6 +37,37 @@ macro-paths: ["macros", "shared/macros"]
 - `scripts/build-dataset.sh`: `queria sync`（pull → ビルド → push）を回す
 - `scripts/migrate_metadata.py`: メタデータを `dataset.yml` へ移す（リポジトリごとに 1 回）
 
+## 提供モジュール
+
+`shared/` は名前空間パッケージとして各データセットのルートから import できる。
+`sys.path` をいじる必要も、依存に足す必要もない。
+
+### `credentials.py`: 書き込み先の secret を生かし続ける
+
+**DuckDB は認証情報の期限を見て取り直さない。** `REFRESH auto` を付けても、
+チェーンが走るのは secret を作った瞬間だけ。1 時間走るビルドは途中で 403
+（`SignatureDoesNotMatch`）を食って死ぬ。**secret を作り直したときだけ**
+チェーンが走り直す。
+
+```python
+from shared.credentials import Secret
+
+secret = Secret(conn)
+if Secret.needed():
+    secret.install()
+
+for batch in batches:
+    secret.refresh_if_due()   # 切れ目で呼ぶ。間隔は helper が決める
+    write(batch)
+```
+
+`refresh_if_due()` は間隔（既定 10 分）が来るまで何もしないので、数秒ごとの
+ループから呼んでよい。
+
+**切れ目が要る。** 1 本の文が期限をまたいで走り続ける場合、その間に何も挟めない
+ので救えない。そのときは文を割るか、アカウントの TTL を伸ばす
+（`user_profiles.credential_ttl_seconds`）。
+
 ## 記述の規約
 
 データセットについて分かったことを、カラム・テーブル・データセットのどの階層に
