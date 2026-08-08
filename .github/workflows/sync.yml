@@ -4,7 +4,9 @@ on:
   workflow_call:
     inputs:
       dataset_name:
-        required: true
+        # 呼び出し側が渡しているだけで、この workflow は使っていない。
+        # 全リポの呼び出しから外したら、入力ごと外す
+        required: false
         type: string
       s3_bucket:
         # fdl のリポだけが使う。queria に移ったリポでは何も指さないので、
@@ -59,25 +61,6 @@ jobs:
           else
             scripts/build.sh
           fi
-
-      - name: Generate app token
-        id: app-token
-        if: success()
-        uses: actions/create-github-app-token@v3
-        with:
-          app-id: ${{ secrets.APP_ID }}
-          private-key: ${{ secrets.APP_PRIVATE_KEY }}
-          owner: queria-io
-          repositories: dataset-catalog
-
-      - name: Trigger catalog rebuild
-        if: success()
-        run: |
-          gh api repos/queria-io/dataset-catalog/dispatches \
-            -f event_type=dataset-updated \
-            -f "client_payload[dataset]=${{ inputs.dataset_name }}"
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
 
   notify-failure:
     runs-on: ubuntu-latest
