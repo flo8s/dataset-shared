@@ -13,10 +13,16 @@ on:
         # 最後のリポが移り終わったら入力ごと外す
         required: false
         type: string
+      runs-on:
+        # 取得元が日本国外を弾くリポは self-hosted (国内) を渡す
+        description: 実行するランナー
+        required: false
+        type: string
+        default: ubuntu-latest
 
 jobs:
   sync:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runs-on }}
     env:
       PYTHONUNBUFFERED: "1"
       # queria は誰のデータセットに書くのかをトークンから決める。R2 の鍵は渡さない
