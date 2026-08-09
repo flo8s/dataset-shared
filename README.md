@@ -35,7 +35,6 @@ macro-paths: ["macros", "shared/macros"]
 ## 提供スクリプト
 
 - `scripts/build-dataset.sh`: `queria sync`（pull → ビルド → push）を回す
-- `scripts/migrate_metadata.py`: メタデータを `dataset.yml` へ移す（リポジトリごとに 1 回）
 
 ## 記述の規約
 
@@ -49,41 +48,10 @@ macro-paths: ["macros", "shared/macros"]
 docs.queria.io のクックブックに取り込まれる。取り込みはカタログに登録済みの
 リポジトリからしか行われないので、これは first-party 固有の話になる。
 
-## メタデータの移行
+メタデータは `dataset.yml` と `*.table.yml` にだけ書く。dbt の `meta:` には書かない。
+配布されるのは `queria compile` が出力する `dataset.json` で、その入力は宣言だけ。
 
-データセットのメタデータは `fdl.toml` の `[meta]` と dbt の `meta:` に分かれているが、
-これを `dataset.yml` と `*.table.yml` に移す。移行後は Queria のカタログが
-`queria compile` の出力する `dataset.json` を読む。
-
-```bash
-bash scripts/build.sh           # dbt が manifest.json を書く
-python shared/scripts/migrate_metadata.py
-```
-
-**テキストを移すだけで、実データには触らない。** 列の型・列順・NULL 許容は
-`queria compile` が実データから解決するので、移行時に列を列挙する必要がない。
-
-判断できないものは止まる。`fdl.toml` の自由文ライセンスは ID へ機械的に変換するが、
-`LICENSE_IDS` に無いものはエラーにして人に決めさせる（勝手に推測しない）。
-
-移行が持ってこられないものは、そのあと手で書く。
-
-| 項目 | 理由 |
-|---|---|
-| `contributors` | 誰を帰属先にするかは既存メタデータに無い。多くのライセンスが必須なので `queria validate` が止まる |
-| `temporal_coverage` / `spatial_coverage` | 収録範囲は人が知っている |
-
-**`[meta]` と `meta.*` はすぐには消さない。** カタログが `dataset.json` を読むように
-なる前に消すと、本番でそのデータセットのメタデータが空になる。
-
-**`ai_context` は廃止する。** 移行スクリプトは `fdl.toml` から持ってこられないものと
-して挙げているが、書いても読む先が無いので手で埋める必要はない。既に書いてある
+**`ai_context` は廃止する。** 書いても読む先が無いので埋める必要はない。既に書いてある
 リポジトリは、`instructions` を各階層の説明へ、`synonyms` を `keywords` へ畳んで
 外す。畳み終わってから `queria` の `DATASET_KEYS` とスキーマからも落とす。
 
-### 開発
-
-```bash
-uv sync
-uv run pytest
-```
