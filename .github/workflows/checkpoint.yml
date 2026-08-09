@@ -30,14 +30,9 @@ jobs:
           enable-cache: true
       - run: uv python install 3.13
 
-      # fdl.toml の有無が「このリポはまだ fdl か」の判定。移行済みのリポには無い
       - name: Install dependencies
         run: |
-          if [ -f fdl.toml ]; then
-            uv lock --upgrade-package frozen-ducklake
-          else
-            uv lock --upgrade-package queria
-          fi
+          uv lock --upgrade-package queria
           uv sync
 
       # スナップショットの expire と、それが押さえていたデータファイルの削除。
@@ -51,12 +46,6 @@ jobs:
       # 既定で expire も行うため、明示的に expire したあとは --keep-history で二度回さない
       - name: Expire snapshots and publish
         run: |
-          if [ -f fdl.toml ]; then
-            uv run fdl pull default
-            uv run fdl expire default --retention-days 7
-            uv run fdl push default
-          else
-            uv run queria pull
-            uv run queria expire --retention-days 7
-            uv run queria push --keep-history
-          fi
+          uv run queria pull
+          uv run queria expire --retention-days 7
+          uv run queria push --keep-history

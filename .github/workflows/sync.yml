@@ -49,24 +49,14 @@ jobs:
           enable-cache: true
       - run: uv python install 3.13
 
-      # どちらもベータ開発中なので、常に最新版を使用する。
-      # fdl.toml の有無が「このリポはまだ fdl か」の判定。移行済みのリポには無い
+      # queria はベータ開発中なので、常に最新版を使用する
       - name: Install dependencies
         run: |
-          if [ -f fdl.toml ]; then
-            uv lock --upgrade-package frozen-ducklake
-          else
-            uv lock --upgrade-package queria
-          fi
+          uv lock --upgrade-package queria
           uv sync
 
       - name: Build and push
-        run: |
-          if [ -f fdl.toml ]; then
-            scripts/build.sh default
-          else
-            scripts/build.sh
-          fi
+        run: scripts/build.sh
 
   notify-failure:
     runs-on: ubuntu-latest
