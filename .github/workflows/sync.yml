@@ -19,6 +19,12 @@ on:
         required: false
         type: string
         default: ubuntu-latest
+      node_version:
+        # ビルドが Node のツールを呼ぶリポだけが渡す。省略時は Node を用意しない
+        # (ランナー標準の Node はイメージ更新で上がるので、要るリポは版を明示する)
+        description: 用意する Node.js のバージョン
+        required: false
+        type: string
 
 jobs:
   sync:
@@ -48,6 +54,11 @@ jobs:
         with:
           enable-cache: true
       - run: uv python install 3.13
+
+      - uses: actions/setup-node@v7
+        if: inputs.node_version != ''
+        with:
+          node-version: ${{ inputs.node_version }}
 
       # queria はベータ開発中なので、常に最新版を使用する
       - name: Install dependencies
